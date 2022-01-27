@@ -1,7 +1,7 @@
 import os
 import sys
 import unittest
-import faker.config
+# import faker.config
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "django.forms",
     # third party
     "rest_framework",
+    "image_handler",
     # apps
 ]
 

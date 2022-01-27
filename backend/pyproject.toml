@@ -1,32 +1,17 @@
 [tool.poetry]
-name = "Test task main"
+name = "Ida project"
 version = "0.1.0"
-description = ""
-authors = ["Egor Ponyavin <ep@idaproject.com>"]
+description = "Test task"
+authors = ["DOBRO-228 <matematikaigor@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-psycopg2 = "~2.8.5"
-# Django
-Django = "==3.1.6"
-# Django Rest Framework
-djangorestframework = "~3.11.0"
-# third
-requests = "~2.23.0"
-Pillow-SIMD = "~7.0.0.post3"
-cryptography = "2.1.4"
-
-# Testing
-factory-boy = "~2.12.0"
-coverage = "~5.1.0"
+python = "^3.9.1"
+djangorestframework = "^3.13.1"
+django-debug-toolbar = "^3.2.4"
 
 [tool.poetry.dev-dependencies]
-django-debug-toolbar = "2.2"
-
-[tool.black]
-line-length = 100
+wemake-python-styleguide = "^0.16.0"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
