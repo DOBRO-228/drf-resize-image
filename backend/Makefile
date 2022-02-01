@@ -7,7 +7,7 @@ test:
 sort:
 	poetry run isort .
 start:
-	poetry run python3 manage.py runserver
+	poetry run python3.10 manage.py runserver
 start_gunicorn:
 	poetry run gunicorn task_manager.wsgi
 shell:
@@ -20,3 +20,5 @@ export_req:
 	poetry export -f requirements.txt --output requirements.txt
 make_fixture:
 	poetry run python3 manage.py dumpdata labels.Label --pk 1 --indent 4 > fixtures/labels.json
+flush_db:
+	poetry run python3 manage.py flush 

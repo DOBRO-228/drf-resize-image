@@ -5,12 +5,21 @@ description = "Test task"
 authors = ["DOBRO-228 <matematikaigor@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9.1"
-djangorestframework = "^3.13.1"
-django-debug-toolbar = "^3.2.4"
+python = "^3.9"
+psycopg2 = "~2.8.5"
+Django = "==3.1.6"
+djangorestframework = "~3.11.0"
+requests = "~2.23.0"
+Pillow-SIMD = "~7.0.0.post3"
+cryptography = "2.1.4"
+python-dotenv = "^0.19.1"
 
 [tool.poetry.dev-dependencies]
+isort = "^5.9.3"
 wemake-python-styleguide = "^0.16.0"
+django-debug-toolbar = "2.2"
+factory-boy = "~2.12.0"
+coverage = "~5.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
