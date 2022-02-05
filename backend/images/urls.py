@@ -1,9 +1,9 @@
 from django.urls import path
-from images.views import DetailImageView, ImagesViewSet, ImageView
+from images.views import ImageResizeView, ImagesViewSet, ImageView
 
 app_name = 'images'
 urlpatterns = [
-    # path('', ImageView.as_view()),
+    # path('<int:pk>/resize', ImageResizeView.as_view(), name='resize_image'),
     # path('<int:pk>/', DetailImageView.as_view()),
 ]
 

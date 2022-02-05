@@ -1,73 +1,148 @@
-import io
 import os
-import random
-import re
-import string
-from io import BytesIO
+import tempfile
 from urllib.parse import urlparse
 
 import requests
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-from images.models import Image as ImageModel
-from PIL import Image
-from rest_framework.parsers import JSONParser
-from rest_framework.renderers import JSONRenderer
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from images.models import Image
+from PIL import Image as PILImage
 
 
-class DownloadImageMixin(object):
-    """"""
+class ImageHandlerMixin(object):
+    """Mixin provides save and resize image methods."""
 
-    def download_image(self, payload_of_request):
+    def save_image(self, request_payload):
         """
+        Download image from url or save provided image.
+
+        Args:
+            request_payload(dict): Request payload - url or file.
+
+        Returns:
+            image_object(models.Image): New instance of Image object.
         """
-        headers = {
-            'accept': '*/*',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-        }
-        path_to_image = self.build_path(payload_of_request)
-        if payload_of_request.get('file') is not None:
-            downloaded_file = payload_of_request.get('file')
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            if request_payload.get('file') is not None:
+                downloaded_file = request_payload.get('file')
+            else:
+                downloaded_file = self.download_from_url(request_payload.get('url'), tmp_file)
+            with PILImage.open(downloaded_file) as image:
+                width, height = image.size
+                image.save(tmp_file, image.format)
+            tmp_file.name = downloaded_file.name
+            return self.create_new_image_instance(
+                tmp_file,
+                width=width,
+                height=height,
+                url=request_payload.get('url'),
+            )
+
+    def download_from_url(self, url, temporary_file):
+        """
+        Download image from url.
+
+        Args:
+            temporary_file(file): Temporary file, where to write a downloaded image.
+
+        Returns:
+            temporary_file(file): Temporary file containing an image.
+        """
+        with requests.get(url, stream=True) as downloaded_file:
+            downloaded_file.raise_for_status()
+            for chunk in downloaded_file.iter_content(chunk_size=8192):  # Noqa: WPS432
+                temporary_file.write(chunk)
+        path = urlparse(url).path
+        filename = path.split('/').pop()
+        temporary_file.name = filename
+        return temporary_file
+
+    def resize_image(self, request_payload, parent_object):
+        """
+        Resize image.
+
+        Args:
+            request_payload(dict): New width and height of image.
+            parent_object(models.Image): Parent Image which need to resize.
+
+        Returns:
+            image_object(models.Image): New instance of Image object.
+        """
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            with PILImage.open(parent_object.picture.file) as image:
+                properties = self.define_new_properties(
+                    image, request_payload, parent_object.picture.name,
+                )
+                resized_image = image.resize(
+                    (properties.get('width'), properties.get('height')),
+                )
+                resized_image.save(tmp_file, image.format)
+            tmp_file.name = properties.get('name')
+            return self.create_new_image_instance(
+                tmp_file,
+                width=properties.get('width'),
+                height=properties.get('height'),
+                parent_object=parent_object,
+            )
+
+    def define_new_properties(self, pillow_object, request_payload, parent_name):
+        """
+        Define new properties for image which need to resize.
+
+        Args:
+            pillow_object(object): Opened image via Pillow.
+            request_payload(dict): New width and height of image.
+            parent_name(str): Parent Image which need to resize.
+
+        Returns:
+            properties(dict): Properties for image which need to resize.
+        """
+        name, ext = os.path.splitext(parent_name)
+        if request_payload.get('width') is not None:
+            width = request_payload.get('width')
+            name = '{0}_{1}'.format(name, width)
         else:
-            response = requests.get(payload_of_request.get('url'), headers=headers)
-            downloaded_file = BytesIO(response.content)
-        image = Image.open(downloaded_file)
-        image.save(path_to_image)
-        return self.save_in_database(path_to_image, payload_of_request.get('url'))
-    
-    def save_in_database(self, path_to_image, url=None):
-        opened_pil_object = Image.open(path_to_image)
-        width, height = opened_pil_object.size
-        name = re.search(r'([^\/]+$)', opened_pil_object.filename).group()
-        image = ImageModel(
+            width = pillow_object.width
+            name = '{0}_0'.format(name)
+        if request_payload.get('height') is not None:
+            height = request_payload.get('height')
+            name = '{0}_{1}'.format(name, height)
+        else:
+            height = pillow_object.height
+            name = '{0}_0'.format(name)
+        return {
+            'width': int(width),
+            'height': int(height),
+            'name': '{0}{1}'.format(name, ext),
+        }
+
+    def create_new_image_instance(self, temporary_file, **kwargs):
+        """
+        Create new image instance.
+
+        Args:
+            temporary_file(file): Temporary file containing an image.
+
+        Returns:
+            properties(dict): Properties for image which need to resize.
+        """
+        image_file = InMemoryUploadedFile(
+            temporary_file,
+            None,
+            temporary_file.name,
+            'image/jpeg',
+            None,
+            None,
+        )
+        if kwargs.get('parent_object'):
+            url = kwargs.get('parent_object').url
+        else:
+            url = kwargs.get('url')
+        image = Image(
             url=url,
-            name=name,
-            picture=path_to_image,
-            width=width,
-            height=height,
-            parent_picture=None,
+            picture=image_file,
+            width=kwargs.get('width'),
+            height=kwargs.get('height'),
+            parent_picture=kwargs.get('parent_object'),
         )
         image.save()
-        print(ImageModel.objects.all())
         return image
-
-    def build_path(self, payload_of_request):
-        """"""
-        cwd = os.getcwd()
-        url_path = urlparse(payload_of_request.get('url')).path
-        if payload_of_request.get('url') is not None:
-            file_name = re.search(r'([^\/]+$)', url_path).group()
-        else:
-            file_name = re.sub(r'[^A-Za-z\d.-]', '_', str(payload_of_request.get('file')))
-        path = '{0}/media/{1}'.format(cwd, file_name)
-        if os.path.exists(path):
-            file_name = self.get_uniq_filename(file_name)
-        return '{0}/media/{1}'.format(cwd, file_name)
-
-    def get_uniq_filename(self, file_name):
-        random_str = ''.join(random.choices(
-            string.ascii_letters + string.digits + string.ascii_uppercase + string.ascii_lowercase,
-            k=7,
-        ))
-        dot_index = file_name.rfind('.')
-        return '{0}_{1}{2}'.format(file_name[:dot_index], random_str, file_name[dot_index:])
