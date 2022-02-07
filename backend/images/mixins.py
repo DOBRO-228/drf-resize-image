@@ -22,13 +22,12 @@ class ImageHandlerMixin(object):
             image_object(models.Image): New instance of Image object.
         """
         with tempfile.NamedTemporaryFile() as tmp_file:
-            if request_payload.get('file') is not None:
+            if request_payload.get('file'):
                 downloaded_file = request_payload.get('file')
             else:
                 downloaded_file = self.download_from_url(request_payload.get('url'), tmp_file)
             with PILImage.open(downloaded_file) as image:
                 width, height = image.size
-                image.save(tmp_file, image.format)
             tmp_file.name = downloaded_file.name
             return self.create_new_image_instance(
                 tmp_file,
@@ -48,7 +47,6 @@ class ImageHandlerMixin(object):
             temporary_file(file): Temporary file containing an image.
         """
         with requests.get(url, stream=True) as downloaded_file:
-            downloaded_file.raise_for_status()
             for chunk in downloaded_file.iter_content(chunk_size=8192):  # Noqa: WPS432
                 temporary_file.write(chunk)
         path = urlparse(url).path
@@ -97,13 +95,13 @@ class ImageHandlerMixin(object):
             properties(dict): Properties for image which need to resize.
         """
         name, ext = os.path.splitext(parent_name)
-        if request_payload.get('width') is not None:
+        if request_payload.get('width'):
             width = request_payload.get('width')
             name = '{0}_{1}'.format(name, width)
         else:
             width = pillow_object.width
             name = '{0}_0'.format(name)
-        if request_payload.get('height') is not None:
+        if request_payload.get('height'):
             height = request_payload.get('height')
             name = '{0}_{1}'.format(name, height)
         else:

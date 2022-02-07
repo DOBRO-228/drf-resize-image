@@ -2,8 +2,6 @@ from django.shortcuts import get_object_or_404
 from images.mixins import ImageHandlerMixin
 from images.models import Image
 from images.serializers import CreateImageSerializer, ImageSerializer, ResizeImageSerializer
-from PIL import UnidentifiedImageError
-from requests.exceptions import RequestException
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,14 +17,7 @@ class ImagesViewSet(ImageHandlerMixin, ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = CreateImageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        try:
-            image = self.save_image(serializer.validated_data)
-        except RequestException:
-            response = {'message': "Can't download from this url. Maybe it's invalid or server doesn't respond."}  # Noqa: E501
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        except UnidentifiedImageError:
-            response = {'message': 'File from this url is not an image.'}
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        image = self.save_image(serializer.validated_data)
         serializer = ImageSerializer(
             image, context={'request': request},
         )
