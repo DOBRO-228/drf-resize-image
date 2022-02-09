@@ -4,9 +4,9 @@ import unittest
 
 # import faker.config
 from django.utils.translation import gettext_lazy as _
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -76,7 +76,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
         'HOST': 'localhost',
         'PORT': 5432,
         'CONN_MAX_AGE': 600,
