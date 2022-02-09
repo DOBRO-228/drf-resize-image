@@ -14,8 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'rw+t6fn87n-r+9%$s^r8hvja2yux(rz#!8th3_1^e2
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
-# DEBUG = os.getenv('DEBUG', 'True') == 'True' and not TESTING
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True' and not TESTING
 
 ALLOWED_HOSTS = ['*']
 

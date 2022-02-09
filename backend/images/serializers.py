@@ -115,13 +115,13 @@ class ResizeImageSerializer(Serializer):
             raise ValidationError(message)
         width = size_parameters.get('width')
         height = size_parameters.get('height')
-        if width:
+        if width is not None:
             if width < 1:
                 message = {
                     'error': "'width' and 'height' parameters must be more than 0.",
                 }
                 raise ValidationError(message)
-        if height:
+        if height is not None:
             if height < 1:
                 message = {
                     'error': "'width' and 'height' parameters must be more than 0.",

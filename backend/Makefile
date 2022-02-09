@@ -1,9 +1,9 @@
 install:
 	poetry install
 lint:
-	poetry run flake8 backend
+	poetry run flake8 images
 test:
-	poetry run python3 manage.py test
+	poetry run python3 manage.py test images.tests.view_tests images.tests.validation_tests images.tests.mixin_methods_tests
 sort:
 	poetry run isort .
 start:
@@ -18,7 +18,5 @@ migrate:
 	poetry run python3 manage.py migrate
 export_req:
 	poetry export -f requirements.txt --output requirements.txt
-make_fixture:
-	poetry run python3 manage.py dumpdata labels.Label --pk 1 --indent 4 > fixtures/labels.json
 flush_db:
 	poetry run python3 manage.py flush 
