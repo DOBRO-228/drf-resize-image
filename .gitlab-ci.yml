@@ -32,8 +32,11 @@ build_backend:
 
 test_internal:
   stage: test
+  services:
+  - postgres:12.2-alpine
   variables:
-    DATABASE_URL: sqlite:///task_manager.sqlite3
+    POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    POSTGRES_HOST_AUTH_METHOD: trust
   script:
     - docker pull ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_NAME}
     - >
