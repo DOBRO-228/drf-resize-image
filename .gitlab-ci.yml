@@ -32,6 +32,8 @@ build_backend:
 
 test_internal:
   stage: test
+  variables:
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   script:
     - docker pull ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_NAME}
     - >
