@@ -83,6 +83,9 @@ DATABASES = {
     }
 }
 
+print(os.getenv('ENVIRONMENT'))
+print(os.getenv('DATABASE_URL'))
+
 if os.getenv('ENVIRONMENT') == 'Pipeline':
     DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
     DATABASES['default']['OPTIONS'].pop('sslmode')
