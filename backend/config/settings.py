@@ -71,24 +71,25 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#         'CONN_MAX_AGE': 600,
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
-        'HOST': 'localhost',
-        'PORT': 5432,
-        'CONN_MAX_AGE': 600,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'database',
     }
 }
-
-print(os.getenv('ENVIRONMENT'))
-print(os.getenv('DATABASE_URL'))
-
-if os.getenv('ENVIRONMENT') == 'Pipeline':
-    DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
-    DATABASES['default']['OPTIONS'].pop('sslmode')
 
 
 # Password validation
