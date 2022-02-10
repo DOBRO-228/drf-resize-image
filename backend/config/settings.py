@@ -5,8 +5,6 @@ import unittest
 # import faker.config
 from django.utils.translation import gettext_lazy as _
 # from dotenv import load_dotenv
-import dj_database_url
-# load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
