@@ -6,6 +6,7 @@ variables:
 
 services:
   - docker:19.03.1-dind
+  - postgres:12.2-alpine
 
 .before_script_docker_login: &before_script_docker_login
   echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
@@ -32,6 +33,10 @@ build_backend:
 
 test_internal:
   stage: test
+  
+  variables:
+    ENVIRONMENT: Pipeline
+    DATABASE_URL: sqlite:///task_manager.sqlite3
   script:
     - docker pull ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_NAME}
     - >
