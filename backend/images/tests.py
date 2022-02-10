@@ -53,19 +53,39 @@ class ImagesTest(APITestCase):
         self.assertEqual(response.data['height'], self.image.height)
         self.assertEqual(response.data['parent_picture'], self.image.parent_picture)
 
+    def test_get_detail_image_not_found(self):
+        """Test getting non existence object."""
+        url = reverse('images-detail', kwargs={'pk': 1488228})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_destroy(self):
         """Test destroying object."""
-        created_image = ImageFactory()
-        url_get = reverse('images-detail', kwargs={'pk': created_image.id})
-        response = self.client.get(url_get)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        url_delete = reverse('images-detail', kwargs={'pk': created_image.id})
+        image_qs = Image.objects.filter(pk=self.image.id)
+        self.assertTrue(image_qs.exists())
+        url_delete = reverse('images-detail', kwargs={'pk': self.image.id})
         response = self.client.delete(url_delete)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(Image.DoesNotExist):
-            Image.objects.get(pk=created_image.id)
-        response = self.client.get(url_get)
+            Image.objects.get(pk=self.image.id)
+
+    def test_destroy_not_found(self):
+        """Test destroying non existence object."""
+        url_delete = reverse('images-detail', kwargs={'pk': 1488228})
+        response = self.client.delete(url_delete)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update(self):
+        """Test updating object."""
+        url_update = reverse('images-detail', kwargs={'pk': self.image.id})
+        response = self.client.put(url_update)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_partial_update(self):
+        """Test updating object."""
+        url_patch = reverse('images-detail', kwargs={'pk': self.image.id})
+        response = self.client.patch(url_patch)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_create_from_url(self):
         """Test creating object from url."""
@@ -94,6 +114,16 @@ class ImagesTest(APITestCase):
         self.assertTrue(image_qs.exists())
         image_instance = Image.objects.get(pk=response.data['id'])
         self.assertNotEqual(self.image.picture.file, image_instance.picture.file)
+
+    def test_resize_not_found(self):
+        """Test resizing non existence object."""
+        url = reverse('images-resize', kwargs={'pk': 1488228})
+        response = self.client.post(
+            url,
+            data=json.dumps({'width': 228}),
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_resize_width_and_height(self):  # Noqa: WPS210
         """Test resizing width and height."""
@@ -154,7 +184,7 @@ class ImagesTest(APITestCase):
         self.assertTrue('_0_' and str(new_height) in resized_image.name)
 
 
-class ValidationTest(APITestCase):
+class ImagesValidationTest(APITestCase):
     """Test validation."""
 
     def setUp(self):
@@ -275,7 +305,7 @@ class ValidationTest(APITestCase):
             )
 
 
-class MixinMethodsTest(ImageHandlerMixin, TestCase):
+class ImagesMixinMethodsTest(ImageHandlerMixin, TestCase):
     """Test ImageHandlerMixin methods."""
 
     def setUp(self):
