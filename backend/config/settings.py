@@ -5,7 +5,7 @@ import unittest
 # import faker.config
 from django.utils.translation import gettext_lazy as _
 # from dotenv import load_dotenv
-
+import dj_database_url
 # load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -82,6 +82,11 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
     }
 }
+
+if os.getenv('ENVIRONMENT') == 'Pipeline':
+    DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
+    DATABASES['default']['OPTIONS'].pop('sslmode')
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
