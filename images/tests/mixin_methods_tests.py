@@ -10,7 +10,7 @@ from images.models import Image
 from PIL import Image as PILImage
 
 
-class MixinMethodsTest(ImageHandlerMixin, TestCase):
+class ImagesMixinMethodsTest(ImageHandlerMixin, TestCase):
     """Test ImageHandlerMixin methods."""
 
     def setUp(self):
