@@ -226,7 +226,7 @@ class ValidationTest(APITestCase):
 
     def test_file_validation(self):
         """Test file validation."""
-        url = 'https://psv4.userapi.com/c848120/u195413215/docs/d14/ba772e6e51dd/Strakhovka.docx'
+        url = 'https://file38.gofile.io/download/a9d85056-1ac6-47a4-bf1a-df575d5e4cec/SQL.txt'
         response_with_url = self.client.post(
             reverse('images-list'),
             data=json.dumps({'url': url}),
